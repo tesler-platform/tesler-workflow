@@ -20,6 +20,9 @@
 
 package io.tesler.source;
 
+import static java.util.Comparator.comparing;
+import static java.util.Comparator.naturalOrder;
+import static java.util.Comparator.nullsLast;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
@@ -28,24 +31,22 @@ import io.tesler.api.data.dto.rowmeta.ActionDTO;
 import io.tesler.core.service.action.ActionScope;
 import io.tesler.model.workflow.entity.WorkflowTransition;
 import io.tesler.model.workflow.entity.WorkflowTransitionGroup;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.UtilityClass;
-import org.apache.commons.collections4.ListUtils;
 
 @UtilityClass
 public class WorkflowActionUtils {
 
 	private final String WF_TRANSITION_ID = "wf_";
 
-	private final ActionGroup WITHOUT_GROUP = new ActionGroup(null, null, null, 0);
+	private final TransitionActionGroup WITHOUT_GROUP = new TransitionActionGroup(null, null, null, null);
 
 	public boolean isTransitionAction(final String actionName) {
 		return actionName.startsWith(WF_TRANSITION_ID);
@@ -60,55 +61,61 @@ public class WorkflowActionUtils {
 	}
 
 	public List<ActionDTO> getActions(final List<WorkflowTransition> transitions) {
-		final Map<ActionGroup, List<WorkflowTransition>> transitionGroup = transitions.stream().collect(groupingBy(
-				transition -> ofNullable(transition.getWorkflowTransitionGroup()).map(ActionGroup::new).orElse(WITHOUT_GROUP),
-				mapping(Function.identity(), Collectors.toList())
-		));
-		final List<ActionDTO> actionsWithoutGroup = getActionsWithoutGroup(transitionGroup.remove(WITHOUT_GROUP));
-		return ListUtils.union(getActionWithGroup(transitionGroup), actionsWithoutGroup);
-	}
-
-	private List<ActionDTO> getActionWithGroup(final Map<ActionGroup, List<WorkflowTransition>> transitionGroup) {
-		return transitionGroup.entrySet().stream()
-				.sorted((o1, o2) -> Long.valueOf(o1.getKey().getSeq() - o2.getKey().getSeq()).intValue())
-				.map(entry -> {
-					ActionDTO actionDTO = new ActionDTO(
-							entry.getKey().getType(),
-							entry.getKey().getText(),
-							entry.getKey().getMaxGroupVisualButtonsCount(),
-							getActionsWithoutGroup(entry.getValue())
-					);
-					actionDTO.setAvailable(true);
-					actionDTO.setScope(ActionScope.RECORD.toString().toLowerCase());
-					return actionDTO;
-				})
-				.collect(Collectors.toList());
-	}
-
-	private List<ActionDTO> getActionsWithoutGroup(final List<WorkflowTransition> transitions) {
-		if (transitions != null) {
-			return transitions.stream()
-					.sorted((o1, o2) -> {
-						int o1Seq = Optional.of(o1).map(WorkflowTransition::getSeq).map(Long::intValue).orElse(0);
-						int o2Seq = Optional.of(o2).map(WorkflowTransition::getSeq).map(Long::intValue).orElse(0);
-						return o1Seq - o2Seq;
-					})
-					.map(transition -> {
-						ActionDTO actionDTO = new ActionDTO(actionNameFromTransitionName(transition), transition.getText());
-						actionDTO.setAvailable(true);
-						actionDTO.setScope(ActionScope.RECORD.toString().toLowerCase());
-						actionDTO.setIcon(transition.getIconCode());
-						return actionDTO;
-					})
-					.collect(Collectors.toList());
-		}
-		return Collections.emptyList();
+		final Map<TransitionActionGroup, List<WorkflowTransition>> transitionGroup = transitions.stream()
+				.collect(groupingBy(
+						transition -> ofNullable(transition.getWorkflowTransitionGroup()).map(TransitionActionGroup::new)
+								.orElse(WITHOUT_GROUP),
+						mapping(Function.identity(), Collectors.toList())
+				));
+		List<TransitionAction> result = new ArrayList<>();
+		transitionGroup.remove(WITHOUT_GROUP).forEach(transition -> result.add(new TransitionAction(transition)));
+		transitionGroup.forEach((key, value) -> result.add(new TransitionAction(key, value)));
+		return result.stream()
+				.sorted(comparing(TransitionAction::getSeq, nullsLast(naturalOrder())))
+				.map(TransitionAction::getActionDTO).collect(Collectors.toList());
 	}
 
 	@Getter
 	@EqualsAndHashCode
 	@RequiredArgsConstructor
-	private class ActionGroup {
+	private class TransitionAction {
+
+		private final Long seq;
+
+		private final ActionDTO actionDTO;
+
+		private TransitionAction(final WorkflowTransition workflowTransition) {
+			actionDTO = new ActionDTO(actionNameFromTransitionName(workflowTransition), workflowTransition.getText());
+			actionDTO.setAvailable(true);
+			actionDTO.setScope(ActionScope.RECORD.toString().toLowerCase());
+			actionDTO.setIcon(workflowTransition.getIconCode());
+			seq = workflowTransition.getSeq();
+		}
+
+		private TransitionAction(TransitionActionGroup transitionActionGroup,
+				List<WorkflowTransition> workflowTransitions) {
+			List<TransitionAction> groupedActions = new ArrayList<>();
+			workflowTransitions.forEach(transition -> groupedActions.add(new TransitionAction(transition)));
+			List<ActionDTO> actionDTOS = groupedActions.stream()
+					.sorted(comparing(TransitionAction::getSeq, nullsLast(naturalOrder())))
+					.map(TransitionAction::getActionDTO).collect(Collectors.toList());
+			actionDTO = new ActionDTO(
+					transitionActionGroup.getType(),
+					transitionActionGroup.getText(),
+					transitionActionGroup.getMaxGroupVisualButtonsCount(),
+					actionDTOS
+			);
+			actionDTO.setAvailable(true);
+			actionDTO.setScope(ActionScope.RECORD.toString().toLowerCase());
+			seq = transitionActionGroup.getSeq();
+		}
+
+	}
+
+	@Getter
+	@EqualsAndHashCode
+	@RequiredArgsConstructor
+	private class TransitionActionGroup {
 
 		private final String type;
 
@@ -116,14 +123,14 @@ public class WorkflowActionUtils {
 
 		private final Integer maxGroupVisualButtonsCount;
 
-		private final long seq;
+		private final Long seq;
 
-		private ActionGroup(final WorkflowTransitionGroup transitionGroup) {
+		private TransitionActionGroup(final WorkflowTransitionGroup transitionGroup) {
 			this(
 					transitionGroup.getNameButtonYet(),
 					transitionGroup.getDescription(),
 					transitionGroup.getMaxShowButtonsInGroup(),
-					transitionGroup.getSeq() != null ? transitionGroup.getSeq() : 0
+					transitionGroup.getSeq()
 			);
 		}
 
