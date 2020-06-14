@@ -78,7 +78,7 @@ public interface WorkflowDao extends ExtensionPoint {
 	 * @param uuid уникальный идентификатор шага
 	 * @return шаг указанной версии модели переходов
 	 */
-	WorkflowStep getStepByUuid(WorkflowVersion version, String uuid);
+	WorkflowStep getStepByName(WorkflowVersion version, String uuid);
 
 	/**
 	 * Возвращает все переходы указанной модели переходов уникальные идентификаторы которых равны заданному.
@@ -87,7 +87,7 @@ public interface WorkflowDao extends ExtensionPoint {
 	 * @param uuid уникальный идентификатор перехода
 	 * @return список переходов указанной модели переходов
 	 */
-	List<WorkflowTransition> getTransitionsByUuid(Workflow workflow, String uuid);
+	List<WorkflowTransition> getTransitionsByName(Workflow workflow, String uuid);
 
 	/**
 	 * Возвращает переход указанной версии модели переходов по его уникальному идентификатору.
@@ -96,7 +96,7 @@ public interface WorkflowDao extends ExtensionPoint {
 	 * @param uuid уникальный идентификатор перехода
 	 * @return переход указанной версии модели переходов
 	 */
-	WorkflowTransition getTransitionByUuid(WorkflowVersion version, String uuid);
+	WorkflowTransition getTransitionByName(WorkflowVersion version, String uuid);
 
 	/**
 	 * Возвращает переход последней версии модели переходов по его уникальному идентификатору.
@@ -104,7 +104,7 @@ public interface WorkflowDao extends ExtensionPoint {
 	 * @param uuid уникальный идентификатор перехода
 	 * @return переход последней версии модели переходов
 	 */
-	WorkflowTransition getLastWorkflowTransitionByUuid(String uuid);
+	WorkflowTransition getLastWorkflowTransitionByName(String uuid);
 
 	/**
 	 * Возвращает переход активной версии модели переходов по его уникальному идентификатору.
@@ -112,7 +112,7 @@ public interface WorkflowDao extends ExtensionPoint {
 	 * @param uuid уникальный идентификатор перехода
 	 * @return переход активной версии модели переходов
 	 */
-	WorkflowTransition getActiveWorkflowTransitionByUuid(String uuid);
+	WorkflowTransition getActiveWorkflowTransitionByName(String uuid);
 
 	/**
 	 * Возвращает переход активной модели переходов соответствующей указанному типу активности между шагами с заданными статусами.

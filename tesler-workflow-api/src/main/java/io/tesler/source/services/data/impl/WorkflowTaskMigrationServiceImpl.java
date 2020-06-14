@@ -127,13 +127,13 @@ public class WorkflowTaskMigrationServiceImpl extends
 				workflowEngine.setCustomStep(entity, baseDAO.findById(WorkflowStep.class, dto.getNewStepId()));
 			}
 			if (data.isFieldChanged(WorkflowTaskMigrationDto_.newAutomaticTransitionId)) {
-				final WorkflowTransition automaticTransition = workflowDao.getActiveWorkflowTransitionByUuid(
+				final WorkflowTransition automaticTransition = workflowDao.getActiveWorkflowTransitionByName(
 						dto.getNewAutomaticTransitionId()
 				);
 				if (!Objects.equals(automaticTransition.getSourceStep(), entity.getWorkflowTask().getWorkflowStep())) {
 					throw new BusinessException().addPopup(errorMessage("error.automatic_transition_mismatch"));
 				}
-				entity.setAutomaticTransitionUuid(automaticTransition.getUuid());
+				entity.setAutomaticTransitionName(automaticTransition.getName());
 			}
 		}
 		final WorkflowTaskMigrationDto updatedDto = entityToDto(bc, entity);

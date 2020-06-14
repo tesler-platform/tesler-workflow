@@ -23,7 +23,6 @@ package io.tesler.source.dto;
 import static io.tesler.source.dto.WorkflowTransitionDto_.backgroundExecution;
 import static io.tesler.source.dto.WorkflowTransitionDto_.checkRequiredFields;
 import static io.tesler.source.dto.WorkflowTransitionDto_.name;
-import static io.tesler.source.dto.WorkflowTransitionDto_.uuid;
 import static io.tesler.source.dto.WorkflowTransitionDto_.workflowDestStepId;
 import static io.tesler.source.dto.WorkflowTransitionDto_.workflowDestStepName;
 import static io.tesler.source.dto.WorkflowTransitionDto_.workflowGroupDescription;
@@ -79,7 +78,6 @@ public class WorkflowTransitionDtoConstructor extends DtoConstructor<WorkflowTra
 				)
 				.put(checkRequiredFields, (mapping, entity) -> entity.getCheckRequiredFields())
 				.put(backgroundExecution, (mapping, entity) -> entity.getBackgroundExecution())
-				.put(uuid, (mapping, entity) -> entity.getUuid())
 				.build();
 	}
 

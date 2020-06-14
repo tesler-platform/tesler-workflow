@@ -45,8 +45,8 @@ public abstract class WorkflowableTask extends BaseEntity {
 	@JoinColumn(name = "WF_TASK_ID")
 	private WorkflowTask workflowTask;
 
-	@Column(name = "AUTOMATIC_TRANSITION_UUID")
-	private String automaticTransitionUuid;
+	@Column(name = "AUTOMATIC_TRANSITION_NAME")
+	private String automaticTransitionName;
 
 	@Column(name = "STEP_TERM")
 	private LocalDateTime stepTerm;

@@ -42,7 +42,7 @@ import org.apache.commons.collections4.ListUtils;
 @UtilityClass
 public final class WorkflowActionUtils {
 
-	private static final String WF_TRANSITION_ID = "wf:";
+	private static final String WF_TRANSITION_ID = "wf_";
 
 	private static final ActionGroup WITHOUT_GROUP = new ActionGroup(null, null, null);
 

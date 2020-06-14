@@ -123,32 +123,32 @@ public class WorkflowDaoImpl implements WorkflowDao {
 	}
 
 	@Override
-	public WorkflowStep getStepByUuid(final WorkflowVersion version, final String uuid) {
+	public WorkflowStep getStepByName(final WorkflowVersion version, final String name) {
 		return jpaDao.getSingleResultOrNull(WorkflowStep.class, (root, query, cb) -> cb.and(
 				cb.equal(root.get(WorkflowStep_.workflowVersion), version),
-				cb.equal(root.get(WorkflowStep_.uuid), uuid)
+				cb.equal(root.get(WorkflowStep_.name), name)
 		));
 	}
 
 	@Override
-	public List<WorkflowTransition> getTransitionsByUuid(final Workflow workflow, final String uuid) {
+	public List<WorkflowTransition> getTransitionsByName(final Workflow workflow, final String name) {
 		return jpaDao.getList(WorkflowTransition.class, (root, query, cb) -> cb.and(
 				cb.equal(root.get(WorkflowTransition_.sourceStep).get(WorkflowStep_.workflowVersion)
 						.get(WorkflowVersion_.workflow), workflow),
-				cb.equal(root.get(WorkflowTransition_.uuid), uuid)
+				cb.equal(root.get(WorkflowTransition_.name), name)
 		));
 	}
 
 	@Override
-	public WorkflowTransition getTransitionByUuid(final WorkflowVersion version, final String uuid) {
+	public WorkflowTransition getTransitionByName(final WorkflowVersion version, final String name) {
 		return jpaDao.getSingleResultOrNull(WorkflowTransition.class, (root, query, cb) -> cb.and(
 				cb.equal(root.get(WorkflowTransition_.sourceStep).get(WorkflowStep_.workflowVersion), version),
-				cb.equal(root.get(WorkflowTransition_.uuid), uuid)
+				cb.equal(root.get(WorkflowTransition_.name), name)
 		));
 	}
 
 	@Override
-	public WorkflowTransition getLastWorkflowTransitionByUuid(final String uuid) {
+	public WorkflowTransition getLastWorkflowTransitionByName(final String name) {
 		return jpaDao.getSingleResultOrNull(WorkflowTransition.class, (root, query, cb) -> {
 			final Subquery<Double> subquery = query.subquery(Double.class);
 			final Root<WorkflowTransition> subqueryRoot = subquery.from(WorkflowTransition.class);
@@ -158,21 +158,21 @@ public class WorkflowDaoImpl implements WorkflowDao {
 					cb.and(
 							cb.equal(subqueryRoot.get(WorkflowTransition_.sourceStep).get(WorkflowStep_.workflowVersion)
 									.get(WorkflowVersion_.draft), Boolean.FALSE),
-							cb.equal(subqueryRoot.get(WorkflowTransition_.uuid), uuid)
+							cb.equal(subqueryRoot.get(WorkflowTransition_.name), name)
 					)
 			);
 			return cb.and(
 					cb.equal(root.get(WorkflowTransition_.sourceStep).get(WorkflowStep_.workflowVersion)
 							.get(WorkflowVersion_.version), subquery),
-					cb.equal(root.get(WorkflowTransition_.uuid), uuid)
+					cb.equal(root.get(WorkflowTransition_.name), name)
 			);
 		});
 	}
 
 	@Override
-	public WorkflowTransition getActiveWorkflowTransitionByUuid(String uuid) {
+	public WorkflowTransition getActiveWorkflowTransitionByName(String name) {
 		return jpaDao.getList(WorkflowTransition.class, (root, query, cb) -> cb.and(
-				cb.equal(root.get(WorkflowTransition_.uuid), uuid),
+				cb.equal(root.get(WorkflowTransition_.name), name),
 				cb.equal(
 						root.get(WorkflowTransition_.sourceStep)
 								.get(WorkflowStep_.workflowVersion)

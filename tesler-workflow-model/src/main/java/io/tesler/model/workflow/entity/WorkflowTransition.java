@@ -39,12 +39,6 @@ import lombok.Setter;
 public class WorkflowTransition extends BaseEntity {
 
 	/**
-	 * Уникальный идентификатор
-	 */
-	@Column(name = "UUID")
-	private String uuid;
-
-	/**
 	 * Исходный шаг
 	 */
 	@ManyToOne

@@ -46,7 +46,6 @@ import io.tesler.source.dto.WorkflowTransitionDto;
 import io.tesler.source.dto.WorkflowTransitionDto_;
 import io.tesler.source.services.data.WorkflowTransitionService;
 import io.tesler.source.services.meta.WorkflowTransitionFieldMetaBuilder;
-import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -128,9 +127,6 @@ public class WorkflowTransitionServiceImpl extends
 			entity.setWorkflowTransitionGroup(dto.getWorkflowTransitionGroupId() == null ? null
 					: baseDAO.findById(WorkflowTransitionGroup.class, dto.getWorkflowTransitionGroupId()));
 		}
-		if (dto.isFieldChanged(WorkflowTransitionDto_.workflowDestStepId)) {
-			entity.setUuid(UUID.randomUUID().toString());
-		}
 		if (dto.isFieldChanged(WorkflowTransitionDto_.checkRequiredFields)) {
 			entity.setCheckRequiredFields(dto.getCheckRequiredFields());
 		}
@@ -167,7 +163,6 @@ public class WorkflowTransitionServiceImpl extends
 	@Override
 	protected CreateResult<WorkflowTransitionDto> doCreateEntity(final WorkflowTransition entity,
 			final BusinessComponent bc) {
-		entity.setUuid(UUID.randomUUID().toString());
 		entity.setSourceStep(baseDAO.findById(WorkflowStep.class, bc.getParentIdAsLong()));
 		entity.setDestinationStep(baseDAO.findById(WorkflowStep.class, bc.getParentIdAsLong()));
 		entity.setCheckRequiredFields(Boolean.TRUE);

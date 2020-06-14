@@ -112,14 +112,14 @@ public class WorkflowVersionMigrateTaskAction extends ResponseServiceAction<Work
 				final WorkflowTransition newAutomaticTransition = getNewAutomaticTransition(version, task);
 				final WorkflowStep newStep = getNewStep(version, task, newAutomaticTransition);
 				boolean shouldSkip = (task.getWorkflowTask() != null && newStep == null)
-						|| (task.getAutomaticTransitionUuid() != null && newAutomaticTransition == null);
+						|| (task.getAutomaticTransitionName() != null && newAutomaticTransition == null);
 				if (shouldSkip) {
 					skipped++;
 					continue;
 				}
 				task.getWorkflowTask().setWorkflowStep(newStep);
-				task.setAutomaticTransitionUuid(
-						Optional.ofNullable(newAutomaticTransition).map(WorkflowTransition::getUuid).orElse(null)
+				task.setAutomaticTransitionName(
+						Optional.ofNullable(newAutomaticTransition).map(WorkflowTransition::getName).orElse(null)
 				);
 				migrated++;
 			}
@@ -132,10 +132,10 @@ public class WorkflowVersionMigrateTaskAction extends ResponseServiceAction<Work
 
 
 		private WorkflowTransition getNewAutomaticTransition(final WorkflowVersion version, final WorkflowableTask task) {
-			if (task.getAutomaticTransitionUuid() == null) {
+			if (task.getAutomaticTransitionName() == null) {
 				return null;
 			}
-			return workflowDao.getTransitionByUuid(version, task.getAutomaticTransitionUuid());
+			return workflowDao.getTransitionByName(version, task.getAutomaticTransitionName());
 		}
 
 		private WorkflowStep getNewStep(final WorkflowVersion version, final WorkflowableTask task,
@@ -143,7 +143,7 @@ public class WorkflowVersionMigrateTaskAction extends ResponseServiceAction<Work
 			if (newAutomaticTransition != null) {
 				return newAutomaticTransition.getSourceStep();
 			} else if (task.getWorkflowTask() != null) {
-				return workflowDao.getStepByUuid(version, task.getWorkflowTask().getWorkflowStep().getUuid());
+				return workflowDao.getStepByName(version, task.getWorkflowTask().getWorkflowStep().getName());
 			} else {
 				return null;
 			}

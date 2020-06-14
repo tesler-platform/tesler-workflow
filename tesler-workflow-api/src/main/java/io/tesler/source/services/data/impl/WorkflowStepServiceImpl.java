@@ -43,7 +43,6 @@ import io.tesler.source.dto.WorkflowStepDto;
 import io.tesler.source.dto.WorkflowStepDto_;
 import io.tesler.source.services.data.WorkflowStepService;
 import io.tesler.source.services.meta.WorkflowStepFieldMetaBuilder;
-import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -126,9 +125,6 @@ public class WorkflowStepServiceImpl extends VersionAwareResponseService<Workflo
 							: baseDAO.findById(WorkflowTransition.class, dto.getOverdueTransitionId())
 			);
 		}
-		if (dto.isFieldChanged(WorkflowStepDto_.linkedStatusValue)) {
-			entity.setUuid(UUID.randomUUID().toString());
-		}
 		return new ActionResultDTO<>(entityToDto(bc, entity));
 	}
 
@@ -140,7 +136,6 @@ public class WorkflowStepServiceImpl extends VersionAwareResponseService<Workflo
 
 	@Override
 	protected CreateResult<WorkflowStepDto> doCreateEntity(final WorkflowStep entity, final BusinessComponent bc) {
-		entity.setUuid(UUID.randomUUID().toString());
 		entity.setWorkflowVersion(baseDAO.findById(WorkflowVersion.class, bc.getParentIdAsLong()));
 		baseDAO.save(entity);
 		return new CreateResult<>(entityToDto(bc, entity));

@@ -25,7 +25,6 @@ import static javax.persistence.FetchType.LAZY;
 import io.tesler.api.data.dictionary.LOV;
 import io.tesler.model.core.entity.BaseEntity;
 import java.util.List;
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -43,12 +42,6 @@ import org.hibernate.annotations.Formula;
 @Entity
 @Table(name = "WF_STEP")
 public class WorkflowStep extends BaseEntity {
-
-	/**
-	 * Уникальный идентификатор
-	 */
-	@Column(name = "UUID")
-	private String uuid;
 
 	/**
 	 * Версия модели переходов

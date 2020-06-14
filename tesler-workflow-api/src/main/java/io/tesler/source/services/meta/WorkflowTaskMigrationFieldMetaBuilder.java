@@ -39,7 +39,7 @@ public class WorkflowTaskMigrationFieldMetaBuilder extends FieldMetaBuilder<Work
 	@Override
 	public void buildRowDependentMeta(RowDependentFieldsMeta<WorkflowTaskMigrationDto> fields,
 			InnerBcDescription bcDescription, Long rowId, Long parRowId) {
-		if (workflowableTaskDao.getTask(rowId).getAutomaticTransitionUuid() != null) {
+		if (workflowableTaskDao.getTask(rowId).getAutomaticTransitionName() != null) {
 			fields.setRequired(WorkflowTaskMigrationDto_.newAutomaticTransitionName);
 		}
 	}
