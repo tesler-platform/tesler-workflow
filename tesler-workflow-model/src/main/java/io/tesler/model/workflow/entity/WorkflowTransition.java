@@ -63,6 +63,16 @@ public class WorkflowTransition extends BaseEntity {
 	private String text;
 
 	/**
+	 * Order
+	 */
+	private Long seq;
+
+	/**
+	 * Icon Code
+	 */
+	private String iconCode;
+
+	/**
 	 * Идентификатор группы кнопок
 	 */
 	@ManyToOne

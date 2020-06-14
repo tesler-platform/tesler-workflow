@@ -52,6 +52,9 @@ public class WorkflowTransitionGroup extends BaseEntity {
 	@Column(name = "DESCRIPTION")
 	private String description;
 
+	@Column(name = "SEQ")
+	private Long seq;
+
 	@OneToMany(mappedBy = "workflowTransitionGroup", cascade = {CascadeType.DETACH})
 	private Set<WorkflowTransition> workflowTransitions;
 
