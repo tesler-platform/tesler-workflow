@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <artifactId>tesler-workflow</artifactId>
   <packaging>pom</packaging>
-  <version>3.0.1-SNAPSHOT</version>
+  <version>3.0.0.alpha-1</version>
   <name>IO Tesler - Workflow</name>
   <inceptionYear>2020</inceptionYear>
 
@@ -34,7 +34,7 @@
     <connection>scm:git:git@github.com:tesler-platform/tesler-workflow.git</connection>
     <developerConnection>scm:git:git@github.com:tesler-platform/tesler-workflow.git</developerConnection>
     <url>https://github.com/tesler-platform/tesler-workflow</url>
-    <tag>HEAD</tag>
+    <tag>tesler-workflow-3.0.0.alpha-1</tag>
   </scm>
 
   <parent>
