@@ -7,12 +7,44 @@
   <packaging>pom</packaging>
   <version>3.0.0-SNAPSHOT</version>
   <name>IO Tesler - Workflow</name>
+  <inceptionYear>2020</inceptionYear>
+
+  <url>http://tesler.io</url>
+
+  <organization>
+    <name>Tesler</name>
+  </organization>
+
+  <developers>
+    <developer>
+      <name>Tesler team</name>
+      <email>info@tesler.io</email>
+      <organization>Tesler</organization>
+      <organizationUrl>http://tesler.io</organizationUrl>
+    </developer>
+  </developers>
+
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <scm>
+    <connection>scm:git:git@github.com:tesler-platform/tesler-workflow.git</connection>
+    <developerConnection>scm:git:git@github.com:tesler-platform/tesler-workflow.git</developerConnection>
+    <url>https://github.com/tesler-platform/tesler-workflow</url>
+    <tag>HEAD</tag>
+  </scm>
 
   <parent>
     <groupId>io.tesler</groupId>
     <artifactId>tesler-bom</artifactId>
     <version>2.3.0.RC2</version>
   </parent>
+
 
   <properties>
     <!-- miscellaneous settings -->
