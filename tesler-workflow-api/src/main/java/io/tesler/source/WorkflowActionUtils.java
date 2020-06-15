@@ -34,6 +34,7 @@ import io.tesler.model.workflow.entity.WorkflowTransitionGroup;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.EqualsAndHashCode;
@@ -68,7 +69,8 @@ public class WorkflowActionUtils {
 						mapping(Function.identity(), Collectors.toList())
 				));
 		List<TransitionAction> result = new ArrayList<>();
-		transitionGroup.remove(WITHOUT_GROUP).forEach(transition -> result.add(new TransitionAction(transition)));
+		Optional.ofNullable(transitionGroup.remove(WITHOUT_GROUP)).ifPresent(workflowTransitions -> workflowTransitions
+				.forEach(transition -> result.add(new TransitionAction(transition))));
 		transitionGroup.forEach((key, value) -> result.add(new TransitionAction(key, value)));
 		return result.stream()
 				.sorted(comparing(TransitionAction::getSeq, nullsLast(naturalOrder())))
