@@ -301,6 +301,7 @@ public class WorkflowDaoImpl implements WorkflowDao {
 		workflowTask.setStepName(workflowStep.getName());
 		workflowTask.setVersion(workflowStep.getWorkflowVersion().getVersion());
 		workflowTask.setWorkflowName(workflowStep.getWorkflowVersion().getWorkflow().getName());
+		workflowTask.setTemporalWfStep(workflowStep);
 	}
 
 	public PendingTransition createPendingTransition(final WorkflowTransition transition, final User sessionUser,

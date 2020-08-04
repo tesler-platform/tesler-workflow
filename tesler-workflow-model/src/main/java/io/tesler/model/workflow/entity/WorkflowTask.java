@@ -45,6 +45,16 @@ public class WorkflowTask extends BaseEntity {
 	@Setter(AccessLevel.NONE)
 	private WorkflowStep workflowStep;
 
+	private transient WorkflowStep temporalWfStep;
+
+	public WorkflowStep getWorkflowStep() {
+		if (temporalWfStep != null) {
+			return temporalWfStep;
+		} else {
+			return workflowStep;
+		}
+	}
+
 	private String stepName;
 
 	private Double version;
