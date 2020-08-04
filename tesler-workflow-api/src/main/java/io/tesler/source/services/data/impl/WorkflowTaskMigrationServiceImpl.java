@@ -38,11 +38,9 @@ import io.tesler.engine.workflow.dao.WorkflowableTaskDao;
 import io.tesler.engine.workflow.services.WorkflowDao;
 import io.tesler.engine.workflow.services.WorkflowEngine;
 import io.tesler.model.workflow.entity.WorkflowStep;
-import io.tesler.model.workflow.entity.WorkflowStep_;
 import io.tesler.model.workflow.entity.WorkflowTask_;
 import io.tesler.model.workflow.entity.WorkflowTransition;
 import io.tesler.model.workflow.entity.WorkflowVersion;
-import io.tesler.model.workflow.entity.WorkflowVersion_;
 import io.tesler.model.workflow.entity.WorkflowableTask;
 import io.tesler.model.workflow.entity.WorkflowableTask_;
 import io.tesler.source.dto.WorkflowTaskMigrationDto;
@@ -101,14 +99,12 @@ public class WorkflowTaskMigrationServiceImpl extends
 		return (root, query, cb) -> cb.and(
 				cb.equal(
 						root.get(WorkflowableTask_.workflowTask)
-								.get(WorkflowTask_.workflowStep)
-								.get(WorkflowStep_.workflowVersion)
-								.get(WorkflowVersion_.workflow),
-						version.getWorkflow()
+								.get(WorkflowTask_.workflowName),
+						version.getWorkflow().getName()
 				),
 				cb.equal(
-						root.get(WorkflowableTask_.workflowTask).get(WorkflowTask_.workflowStep).get(WorkflowStep_.workflowVersion),
-						version
+						root.get(WorkflowableTask_.workflowTask).get(WorkflowTask_.version),
+						version.getVersion()
 				),
 				cb.equal(
 						root.get(WorkflowableTask_.templateFlg),
@@ -130,7 +126,7 @@ public class WorkflowTaskMigrationServiceImpl extends
 				final WorkflowTransition automaticTransition = workflowDao.getActiveWorkflowTransitionByName(
 						dto.getNewAutomaticTransitionId()
 				);
-				if (!Objects.equals(automaticTransition.getSourceStep(), entity.getWorkflowTask().getWorkflowStep())) {
+				if (!Objects.equals(automaticTransition.getSourceStep(), workflowDao.getWorkflowStep(entity.getWorkflowTask()))) {
 					throw new BusinessException().addPopup(errorMessage("error.automatic_transition_mismatch"));
 				}
 				entity.setAutomaticTransitionName(automaticTransition.getName());

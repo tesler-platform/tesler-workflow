@@ -79,7 +79,7 @@ public class WorkflowTransitionServiceImpl extends
 							root.get(WorkflowTransition_.sourceStep)
 									.get(WorkflowStep_.workflowVersion)
 									.get(WorkflowVersion_.workflow),
-							task.getWorkflowTask().getWorkflowStep().getWorkflowVersion().getWorkflow()
+							workflowDao.getWorkflowStep(task.getWorkflowTask()).getWorkflowVersion().getWorkflow()
 					),
 					cb.equal(
 							root.get(WorkflowTransition_.sourceStep)
@@ -90,7 +90,7 @@ public class WorkflowTransitionServiceImpl extends
 					cb.not(
 							cb.equal(
 									root.get(WorkflowTransition_.sourceStep).get(WorkflowStep_.workflowVersion),
-									task.getWorkflowTask().getWorkflowStep().getWorkflowVersion()
+									workflowDao.getWorkflowStep(task.getWorkflowTask()).getWorkflowVersion()
 							)
 					)
 			);
@@ -98,7 +98,7 @@ public class WorkflowTransitionServiceImpl extends
 			final WorkflowableTask task = workflowableTaskDao.getTask(bc.getParentIdAsLong());
 			return (root, query, cb) -> cb.equal(
 					root.get(WorkflowTransition_.sourceStep).get(WorkflowStep_.workflowVersion),
-					task.getWorkflowTask().getWorkflowStep().getWorkflowVersion()
+					workflowDao.getWorkflowStep(task.getWorkflowTask()).getWorkflowVersion()
 			);
 		}
 		return (root, cq, cb) -> {

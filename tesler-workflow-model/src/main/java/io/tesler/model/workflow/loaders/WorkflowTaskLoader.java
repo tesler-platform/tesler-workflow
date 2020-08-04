@@ -20,8 +20,13 @@
 
 package io.tesler.model.workflow.loaders;
 
+import io.tesler.model.core.dao.JpaDao;
 import io.tesler.model.core.loaders.AbstractObjectLoader;
+import io.tesler.model.workflow.entity.WorkflowStep;
+import io.tesler.model.workflow.entity.WorkflowStep_;
 import io.tesler.model.workflow.entity.WorkflowTask;
+import io.tesler.model.workflow.entity.WorkflowVersion_;
+import io.tesler.model.workflow.entity.Workflow_;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -32,6 +37,9 @@ public class WorkflowTaskLoader extends AbstractObjectLoader<WorkflowTask> {
 	@Autowired
 	private WorkflowStepLoader workflowStepLoader;
 
+	@Autowired
+	private JpaDao jpaDao;
+
 	@Override
 	protected Class<? extends WorkflowTask> getType() {
 		return WorkflowTask.class;
@@ -41,7 +49,17 @@ public class WorkflowTaskLoader extends AbstractObjectLoader<WorkflowTask> {
 	public WorkflowTask ensureLoaded(WorkflowTask object) {
 		WorkflowTask workflowTask = load(object);
 		if (workflowTask != null) {
-			workflowStepLoader.ensureLoaded(workflowTask.getWorkflowStep());
+			WorkflowStep workflowStep = jpaDao.getFirstResultOrNull(WorkflowStep.class, (root, cq, cb) ->
+					cb.and(
+							cb.equal(root.get(WorkflowStep_.name), workflowTask.getStepName()),
+							cb.equal(root.get(WorkflowStep_.workflowVersion).get(WorkflowVersion_.version), workflowTask.getVersion()),
+							cb.equal(
+									root.get(WorkflowStep_.workflowVersion).get(WorkflowVersion_.workflow).get(Workflow_.name),
+									workflowTask.getWorkflowName()
+							)
+					)
+			);
+			workflowStepLoader.ensureLoaded(workflowStep);
 		}
 		return workflowTask;
 	}

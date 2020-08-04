@@ -26,11 +26,9 @@ import io.tesler.core.exception.BusinessException;
 import io.tesler.engine.workflow.WorkflowSettings;
 import io.tesler.engine.workflow.dao.WorkflowableTaskDao;
 import io.tesler.model.core.dao.JpaDao;
-import io.tesler.model.workflow.entity.WorkflowStep_;
 import io.tesler.model.workflow.entity.WorkflowTask;
 import io.tesler.model.workflow.entity.WorkflowTask_;
 import io.tesler.model.workflow.entity.WorkflowVersion;
-import io.tesler.model.workflow.entity.WorkflowVersion_;
 import io.tesler.model.workflow.entity.WorkflowableTask;
 import io.tesler.model.workflow.entity.WorkflowableTask_;
 import java.util.List;
@@ -74,15 +72,13 @@ public abstract class AbstractWorkflowableTaskDao<E extends WorkflowableTask> im
 	public List<E> getOtherVersionTasks(final WorkflowVersion version) {
 		return jpaDao.getList(workflowSettings.<E>getEntityClass(), (root, query, cb) -> cb.and(
 				cb.equal(
-						root.get(WorkflowableTask_.workflowTask).get(WorkflowTask_.workflowStep).get(WorkflowStep_.workflowVersion)
-								.get(WorkflowVersion_.workflow),
-						version.getWorkflow()
+						root.get(WorkflowableTask_.workflowTask).get(WorkflowTask_.workflowName),
+						version.getWorkflow().getName()
 				),
 				cb.not(
 						cb.equal(
-								root.get(WorkflowableTask_.workflowTask).get(WorkflowTask_.workflowStep)
-										.get(WorkflowStep_.workflowVersion),
-								version
+								root.get(WorkflowableTask_.workflowTask).get(WorkflowTask_.version),
+								version.getVersion()
 						)
 				)
 		));

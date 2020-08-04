@@ -117,7 +117,7 @@ public class WorkflowVersionMigrateTaskAction extends ResponseServiceAction<Work
 					skipped++;
 					continue;
 				}
-				task.getWorkflowTask().setWorkflowStep(newStep);
+				workflowDao.setWorkflowStep(task.getWorkflowTask(), newStep);
 				task.setAutomaticTransitionName(
 						Optional.ofNullable(newAutomaticTransition).map(WorkflowTransition::getName).orElse(null)
 				);
@@ -143,7 +143,7 @@ public class WorkflowVersionMigrateTaskAction extends ResponseServiceAction<Work
 			if (newAutomaticTransition != null) {
 				return newAutomaticTransition.getSourceStep();
 			} else if (task.getWorkflowTask() != null) {
-				return workflowDao.getStepByName(version, task.getWorkflowTask().getWorkflowStep().getName());
+				return workflowDao.getStepByName(version, task.getWorkflowTask().getStepName());
 			} else {
 				return null;
 			}

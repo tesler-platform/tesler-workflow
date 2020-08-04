@@ -113,7 +113,7 @@ final class TransitionInvoke {
 		if (task.getWorkflowTask() == null) {
 			task.setWorkflowTask(workflowDao.createWorkflowTask(destinationStep));
 		} else {
-			task.getWorkflowTask().setWorkflowStep(destinationStep);
+			workflowDao.setWorkflowStep(task.getWorkflowTask(), destinationStep);
 		}
 
 		if (isInProgressStep(destinationStep)) {
@@ -128,7 +128,7 @@ final class TransitionInvoke {
 		for (WorkflowableTask childTask : workflowableTaskDao.findAllLinksWithAutoClosed(task)) {
 			final WorkflowTask workflowTask = childTask.getWorkflowTask();
 			if (workflowTask != null) {
-				final WorkflowStep childStep = workflowTask.getWorkflowStep();
+				final WorkflowStep childStep = workflowDao.getWorkflowStep(workflowTask);
 				if (childStep != null && !isFinalStep(childStep)) {
 					final WorkflowStep autoClosedStep = childStep.getWorkflowVersion().getAutoClosedStep();
 					if (autoClosedStep != null) {
