@@ -76,7 +76,7 @@ public class WorkflowEngineImpl implements WorkflowEngine {
 		if (task.getWorkflowTask() == null) {
 			task.setWorkflowTask(workflowDao.createWorkflowTask(step));
 		} else {
-			task.getWorkflowTask().setWorkflowStep(step);
+			workflowDao.setWorkflowStep(task.getWorkflowTask(), step);
 		}
 	}
 
@@ -128,7 +128,7 @@ public class WorkflowEngineImpl implements WorkflowEngine {
 	public void forceInvokeAutoTransitionToHiddenStep(final WorkflowableTask task) {
 		final WorkflowTask workflowTask = task.getWorkflowTask();
 		if (workflowTask != null) {
-			final WorkflowStep currentStep = workflowTask.getWorkflowStep();
+			final WorkflowStep currentStep = workflowDao.getWorkflowStep(workflowTask);
 			final WorkflowStep hiddenStep = workflowDao.getHiddenStep(currentStep.getWorkflowVersion());
 			if (hiddenStep != null) {
 				final WorkflowTransition transition = workflowDao.getTransitionBetweenSteps(currentStep, hiddenStep);

@@ -37,6 +37,8 @@ public class WorkflowStepTermServiceImpl implements WorkflowStepTermService {
 
 	private final WorkflowEngine workflowEngine;
 
+	private final WorkflowDao workflowDao;
+
 	/**
 	 * Находит активности для которых истек срок выполнения шага и выполняет заданные для них переходы
 	 */
@@ -44,7 +46,7 @@ public class WorkflowStepTermServiceImpl implements WorkflowStepTermService {
 	@Transactional
 	public void invokeOverdueTransitions() {
 		for (final WorkflowableTask task : workflowableTaskDao.getTasksWithStepTermOverdue(DateTimeUtil.now())) {
-			workflowEngine.invokeAutoTransition(task, task.getWorkflowTask().getWorkflowStep().getOverdueTransition());
+			workflowEngine.invokeAutoTransition(task, workflowDao.getWorkflowStep(task.getWorkflowTask()).getOverdueTransition());
 		}
 	}
 

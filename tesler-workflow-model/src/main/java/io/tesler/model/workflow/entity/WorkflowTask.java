@@ -26,8 +26,10 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.JoinFormula;
 
 @Getter
 @Setter
@@ -35,9 +37,19 @@ import lombok.Setter;
 @Table(name = "WF_TASK")
 public class WorkflowTask extends BaseEntity {
 
-	@ManyToOne
-	@JoinColumn(name = "WF_STEP_ID")
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinFormula("(select ws.id from wf_step ws"
+			+ " left join wf_version wv on ws.wf_version_id = wv.id"
+			+ " left join wf on wv.wf_id = wf.id"
+			+ " where ws.name = step_name and wv.version = version and wf.name = workflow_name)")
+	@Setter(AccessLevel.NONE)
 	private WorkflowStep workflowStep;
+
+	private String stepName;
+
+	private Double version;
+
+	private String workflowName;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "PENDING_TRANSITION_ID")

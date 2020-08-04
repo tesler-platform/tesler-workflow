@@ -24,17 +24,18 @@ import static java.util.Optional.ofNullable;
 
 import io.tesler.WorkflowServiceAssociation;
 import io.tesler.api.data.dictionary.LOV;
+import io.tesler.api.service.PluginAware;
 import io.tesler.core.crudma.bc.BusinessComponent;
 import io.tesler.core.crudma.impl.VersionAwareResponseService;
 import io.tesler.core.dto.rowmeta.ActionResultDTO;
 import io.tesler.core.dto.rowmeta.CreateResult;
 import io.tesler.core.service.action.Actions;
 import io.tesler.engine.workflow.dao.WorkflowableTaskDao;
+import io.tesler.engine.workflow.services.WorkflowDao;
 import io.tesler.model.core.entity.BaseEntity;
 import io.tesler.model.core.entity.BaseEntity_;
 import io.tesler.model.workflow.entity.WorkflowStep;
 import io.tesler.model.workflow.entity.WorkflowStep_;
-import io.tesler.model.workflow.entity.WorkflowTask;
 import io.tesler.model.workflow.entity.WorkflowTransition;
 import io.tesler.model.workflow.entity.WorkflowVersion;
 import io.tesler.model.workflow.entity.WorkflowVersion_;
@@ -48,11 +49,15 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 @Service
+@PluginAware
 public class WorkflowStepServiceImpl extends VersionAwareResponseService<WorkflowStepDto, WorkflowStep> implements
 		WorkflowStepService {
 
 	@Autowired
 	private WorkflowableTaskDao<?> workflowableTaskDao;
+
+	@Autowired
+	private WorkflowDao workflowDao;
 
 	public WorkflowStepServiceImpl() {
 		super(WorkflowStepDto.class, WorkflowStep.class, WorkflowStep_.workflowVersion, WorkflowStepFieldMetaBuilder.class);
@@ -72,12 +77,12 @@ public class WorkflowStepServiceImpl extends VersionAwareResponseService<Workflo
 			return (root, query, cb) -> cb.and(
 					cb.equal(
 							root.get(WorkflowStep_.workflowVersion).get(WorkflowVersion_.workflow),
-							task.getWorkflowTask().getWorkflowStep().getWorkflowVersion().getWorkflow()
+							workflowDao.getWorkflowStep(task.getWorkflowTask()).getWorkflowVersion().getWorkflow()
 					),
 					cb.equal(root.get(WorkflowStep_.workflowVersion).get(WorkflowVersion_.draft), Boolean.FALSE),
 					cb.not(cb.equal(
 							root.get(WorkflowStep_.workflowVersion),
-							task.getWorkflowTask().getWorkflowStep().getWorkflowVersion()
+							workflowDao.getWorkflowStep(task.getWorkflowTask()).getWorkflowVersion()
 					))
 			);
 		}
@@ -101,7 +106,7 @@ public class WorkflowStepServiceImpl extends VersionAwareResponseService<Workflo
 						|| WorkflowServiceAssociation.wfTemplateMigrationCurrentStep.isBc(bc)) {
 			return ofNullable(workflowableTaskDao.getTask(bc.getParentIdAsLong()))
 					.map(WorkflowableTask::getWorkflowTask)
-					.map(WorkflowTask::getWorkflowStep)
+					.map(wfTask -> workflowDao.getWorkflowStep(wfTask))
 					.map(WorkflowStep::getWorkflowVersion)
 					.map(BaseEntity::getId)
 					.orElse(null);

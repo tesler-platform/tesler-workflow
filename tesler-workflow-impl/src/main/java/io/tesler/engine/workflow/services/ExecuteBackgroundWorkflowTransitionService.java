@@ -62,6 +62,8 @@ public class ExecuteBackgroundWorkflowTransitionService implements ExtensionPoin
 
 	private final WorkflowEngine workflowEngine;
 
+	private final WorkflowDao workflowDao;
+
 	private final WorkflowableTaskDao<?> workflowableTaskDao;
 
 	private final Optional<WorkflowNotificationService> workflowNotificationService;
@@ -80,10 +82,12 @@ public class ExecuteBackgroundWorkflowTransitionService implements ExtensionPoin
 			final Optional<WorkflowNotificationService> workflowNotificationService,
 			final JpaDao jpaDao, TransactionService transactionService,
 			final InternalAuthorizationService authorizationService,
+			final WorkflowDao workflowDao,
 			final SystemSettings systemSettings) {
 		this.workflowEngine = workflowEngine;
 		this.workflowableTaskDao = workflowableTaskDao;
 		this.workflowNotificationService = workflowNotificationService;
+		this.workflowDao = workflowDao;
 		this.jpaDao = jpaDao;
 		this.transactionService = transactionService;
 		this.authorizationService = authorizationService;
@@ -102,6 +106,7 @@ public class ExecuteBackgroundWorkflowTransitionService implements ExtensionPoin
 		for (WorkflowTask workflowTask : workflowableTaskDao.getPendingTransitionWorkflowTasks()) {
 			callables.add(new TransitionInvoke(
 					workflowEngine,
+					workflowDao,
 					workflowTask.getPendingTransition().getUser().getLogin(),
 					workflowTask.getPendingTransition().getUserRole(),
 					workflowTask.getId()
@@ -126,6 +131,8 @@ public class ExecuteBackgroundWorkflowTransitionService implements ExtensionPoin
 	private class TransitionInvoke implements Callable<Void> {
 
 		private final WorkflowEngine workflowEngine;
+
+		private final WorkflowDao workflowDao;
 
 		private final String userLogin;
 
@@ -166,7 +173,7 @@ public class ExecuteBackgroundWorkflowTransitionService implements ExtensionPoin
 												pendingTransition.getTransition()
 										)
 								);
-								workflowTask.setWorkflowStep(pendingTransition.getTransition().getSourceStep());
+								workflowDao.setWorkflowStep(workflowTask, pendingTransition.getTransition().getSourceStep());
 								workflowTask.setPendingTransition(null);
 							}
 						}));

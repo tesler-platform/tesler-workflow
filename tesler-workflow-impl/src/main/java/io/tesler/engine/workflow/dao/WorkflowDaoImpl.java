@@ -95,7 +95,7 @@ public class WorkflowDaoImpl implements WorkflowDao {
 	public WorkflowStep getCurrentStep(final WorkflowableTask task) {
 		final WorkflowTask workflowTask = task.getWorkflowTask();
 		if (workflowTask != null) {
-			return workflowTask.getWorkflowStep();
+			return getWorkflowStep(task.getWorkflowTask());
 		}
 		return getInitialStep(task.getProject(), task.getTaskType());
 	}
@@ -282,6 +282,27 @@ public class WorkflowDaoImpl implements WorkflowDao {
 				: bigDecimal.add(BigDecimal.valueOf(0.001));
 	}
 
+	@Override
+	public WorkflowStep getWorkflowStep(WorkflowTask workflowTask) {
+		return jpaDao.getFirstResultOrNull(WorkflowStep.class, (root, cq, cb) ->
+				cb.and(
+						cb.equal(root.get(WorkflowStep_.name), workflowTask.getStepName()),
+						cb.equal(root.get(WorkflowStep_.workflowVersion).get(WorkflowVersion_.version), workflowTask.getVersion()),
+						cb.equal(
+								root.get(WorkflowStep_.workflowVersion).get(WorkflowVersion_.workflow).get(Workflow_.name),
+								workflowTask.getWorkflowName()
+						)
+				)
+		);
+	}
+
+	@Override
+	public void setWorkflowStep(WorkflowTask workflowTask, WorkflowStep workflowStep) {
+		workflowTask.setStepName(workflowStep.getName());
+		workflowTask.setVersion(workflowStep.getWorkflowVersion().getVersion());
+		workflowTask.setWorkflowName(workflowStep.getWorkflowVersion().getWorkflow().getName());
+	}
+
 	public PendingTransition createPendingTransition(final WorkflowTransition transition, final User sessionUser,
 			final LOV sessionUserRole) {
 		final PendingTransition pendingTransition = new PendingTransition();
@@ -297,7 +318,7 @@ public class WorkflowDaoImpl implements WorkflowDao {
 			return null;
 		}
 		final WorkflowTask workflowTask = new WorkflowTask();
-		workflowTask.setWorkflowStep(step);
+		setWorkflowStep(workflowTask, step);
 		jpaDao.save(workflowTask);
 		return workflowTask;
 	}

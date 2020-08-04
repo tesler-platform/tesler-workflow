@@ -195,4 +195,17 @@ public interface WorkflowDao extends ExtensionPoint {
 	 */
 	BigDecimal getNextVersion(Workflow workflow, boolean majorVersion);
 
+	/**
+	 * Get workflow step, assigned on workflow task
+	 *
+	 * @return workflow step
+	 */
+	WorkflowStep getWorkflowStep(WorkflowTask workflowTask);
+
+	/**
+	 * Sets workflow step to workflow task
+	 *
+	 */
+	void setWorkflowStep(WorkflowTask workflowTask, WorkflowStep workflowStep);
+
 }
