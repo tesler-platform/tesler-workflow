@@ -27,22 +27,18 @@ import io.tesler.engine.workflow.WorkflowSettings;
 import io.tesler.engine.workflow.dao.WorkflowDaoImpl;
 import io.tesler.model.core.dao.JpaDao;
 import io.tesler.model.core.entity.User;
-import io.tesler.model.workflow.entity.TaskField;
-import io.tesler.model.workflow.entity.WorkflowStep;
-import io.tesler.model.workflow.entity.WorkflowStepField;
-import io.tesler.model.workflow.entity.WorkflowTask;
-import io.tesler.model.workflow.entity.WorkflowTransition;
-import io.tesler.model.workflow.entity.WorkflowableTask;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import io.tesler.model.workflow.entity.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.pf4j.Extension;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -82,13 +78,13 @@ public class WorkflowEngineImpl implements WorkflowEngine {
 
 	@Override
 	public List<WorkflowTransition> getTransitions(final WorkflowableTask task) {
-		log.debug("Получение списка возможных переходов для активности id: {}", task.getId());
+		log.debug("Getting list of possible transitions for task id: {}", task.getId());
 		if (transitionValidate.isPendingTransitionTask(task)) {
-			log.debug("Переход выполняется, другие переходы недоступны");
+			log.debug("Transition is pending, other transitions are unavailable");
 			return Collections.emptyList();
 		}
 		final WorkflowStep currentStep = workflowDao.getCurrentStep(task);
-		log.debug("Текущий шаг активности '{}' id: {}", currentStep.getName(), currentStep.getId());
+		log.debug("Current step of task '{}' id: {}", currentStep.getName(), currentStep.getId());
 		return workflowDao.getTransitions(currentStep).stream()
 				.filter(transition -> transitionCheck.isAvailable(task, transition))
 				.collect(Collectors.toList());
@@ -101,7 +97,7 @@ public class WorkflowEngineImpl implements WorkflowEngine {
 			final WorkflowTransition transition,
 			final List<String> preInvokeParameters) {
 		log.debug(
-				"Выполнение перехода '{}' id: {} для активности id: {}", transition.getName(), transition.getId(), task.getId()
+				"Invoking transition '{}' id: {} for task id: {}", transition.getName(), transition.getId(), task.getId()
 		);
 		transitionValidate.validate(task, transition, true, preInvokeParameters);
 		return transitionInvoke.invoke(bcDescription, task, transition);
@@ -110,7 +106,7 @@ public class WorkflowEngineImpl implements WorkflowEngine {
 	@Override
 	public TransitionResult invokeAutoTransition(WorkflowableTask task, WorkflowTransition transition) {
 		log.debug(
-				"Выполнение автоматического перехода '{}' id: {} для активности id: {}",
+				"Invoking auto transition '{}' id: {} for task id: {}",
 				transition.getName(),
 				transition.getId(),
 				task.getId()
@@ -120,8 +116,19 @@ public class WorkflowEngineImpl implements WorkflowEngine {
 	}
 
 	@Override
+	public TransitionResult forceInvokeAutoTransitionIgnorePostFunctions(WorkflowTransition transition, WorkflowableTask task) {
+		log.debug(
+				"Invoking auto transition with ignoring of post functions '{}' id: {} for task id: {}",
+				transition.getName(),
+				transition.getId(),
+				task.getId()
+		);
+		return transitionInvoke.forceInvoke(null, task, transition, true);
+	}
+
+	@Override
 	public void forceInvokeAutoTransition(final WorkflowableTask task, final WorkflowTransition transition) {
-		transitionInvoke.forceInvoke(null, task, transition);
+		transitionInvoke.forceInvoke(null, task, transition, false);
 	}
 
 	@Override
@@ -132,7 +139,7 @@ public class WorkflowEngineImpl implements WorkflowEngine {
 			final WorkflowStep hiddenStep = workflowDao.getHiddenStep(currentStep.getWorkflowVersion());
 			if (hiddenStep != null) {
 				final WorkflowTransition transition = workflowDao.getTransitionBetweenSteps(currentStep, hiddenStep);
-				transitionInvoke.forceInvoke(null, task, transition);
+				transitionInvoke.forceInvoke(null, task, transition, false);
 			}
 		}
 	}
@@ -156,25 +163,25 @@ public class WorkflowEngineImpl implements WorkflowEngine {
 
 	@Override
 	public List<String> getDisableFields(final WorkflowableTask task) {
-		log.debug("Получение списка нередактируемых полей для активности id: {}", task.getId());
+		log.debug("Getting list of disabled fields for task id: {}", task.getId());
 		final Stream<TaskField> disableFields;
 		if (transitionValidate.isPendingTransitionTask(task)) {
-			log.debug("Переход выполняется, редактирование недоступно");
+			log.debug("Transition is pending, edit is not allowed");
 			disableFields = jpaDao.getList(TaskField.class).stream();
 		} else {
 			final WorkflowStep currentStep = workflowDao.getCurrentStep(task);
-			log.debug("Текущий шаг активности '{}' id: {}", currentStep.getName(), currentStep.getId());
+			log.debug("Current step of task '{}' id: {}", currentStep.getName(), currentStep.getId());
 			final List<WorkflowStepField> stepFields = workflowDao.getStepFields(currentStep);
 			if (stepFields.isEmpty()) {
-				log.debug("Список нередактируемых полей не настроен");
+				log.debug("List of uneditable fields is not configured");
 			}
 			disableFields = stepFields.stream().filter(stepField -> stepField.getTaskField() != null).filter(
 					stepField -> {
-						log.debug("Проверка нередактируемости поля '{}'", stepField.getTaskField().getKey());
+						log.debug("Checking whether the field is not editable '{}'", stepField.getTaskField().getKey());
 						final boolean available = conditionCheck.isAvailable(
 								task, workflowDao.getConditions(workflowSettings.getConditionExtensionClass(), stepField), null
 						);
-						log.debug(available ? "Поле нередактируемо" : "Поле редактируемо");
+						log.debug(available ? "Field is not editable" : "Field is editable");
 						return available;
 					}
 			).map(WorkflowStepField::getTaskField);
