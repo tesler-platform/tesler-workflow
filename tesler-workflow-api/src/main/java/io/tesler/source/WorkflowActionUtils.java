@@ -20,27 +20,26 @@
 
 package io.tesler.source;
 
-import static java.util.Comparator.comparing;
-import static java.util.Comparator.naturalOrder;
-import static java.util.Comparator.nullsLast;
-import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.mapping;
-
 import io.tesler.api.data.dto.rowmeta.ActionDTO;
 import io.tesler.core.service.action.ActionScope;
 import io.tesler.model.workflow.entity.WorkflowTransition;
 import io.tesler.model.workflow.entity.WorkflowTransitionGroup;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.UtilityClass;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.UtilityClass;
+
+import static java.util.Comparator.*;
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
 
 @UtilityClass
 public class WorkflowActionUtils {
@@ -80,7 +79,7 @@ public class WorkflowActionUtils {
 	@Getter
 	@EqualsAndHashCode
 	@RequiredArgsConstructor
-	private class TransitionAction {
+	private static class TransitionAction {
 
 		private final Long seq;
 
@@ -117,7 +116,7 @@ public class WorkflowActionUtils {
 	@Getter
 	@EqualsAndHashCode
 	@RequiredArgsConstructor
-	private class TransitionActionGroup {
+	private static class TransitionActionGroup {
 
 		private final String type;
 
