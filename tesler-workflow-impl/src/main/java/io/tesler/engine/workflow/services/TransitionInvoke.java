@@ -20,9 +20,6 @@
 
 package io.tesler.engine.workflow.services;
 
-import static io.tesler.api.data.dictionary.CoreDictionaries.TaskStatusCategory.isAutoClosed;
-import static io.tesler.api.data.dictionary.CoreDictionaries.TaskStatusCategory.isDone;
-
 import io.tesler.core.crudma.bc.impl.BcDescription;
 import io.tesler.core.dto.rowmeta.PostAction;
 import io.tesler.core.util.DateTimeUtil;
@@ -30,22 +27,21 @@ import io.tesler.core.util.session.SessionService;
 import io.tesler.engine.workflow.dao.WorkflowDaoImpl;
 import io.tesler.engine.workflow.dao.WorkflowableTaskDao;
 import io.tesler.model.core.entity.User;
-import io.tesler.model.workflow.entity.WorkflowStep;
-import io.tesler.model.workflow.entity.WorkflowTask;
-import io.tesler.model.workflow.entity.WorkflowTransition;
-import io.tesler.model.workflow.entity.WorkflowTransitionHistory;
-import io.tesler.model.workflow.entity.WorkflowableTask;
+import io.tesler.model.workflow.entity.*;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.BooleanUtils;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.BooleanUtils;
-import org.springframework.stereotype.Service;
+
+import static io.tesler.api.data.dictionary.CoreDictionaries.TaskStatusCategory.isAutoClosed;
+import static io.tesler.api.data.dictionary.CoreDictionaries.TaskStatusCategory.isDone;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 final class TransitionInvoke {
 
 	private final SessionService sessionService;
@@ -59,6 +55,19 @@ final class TransitionInvoke {
 	private final PostFunctionExecute postFunctionExecute;
 
 	private final WorkflowDaoImpl workflowDao;
+
+	public TransitionInvoke(SessionService sessionService,
+			Optional<StatusCategoryService> statusCategoryService,
+			WorkflowableTaskDao<?> workflowableTaskDao,
+			Optional<ObserverService> observerService,
+			@Lazy PostFunctionExecute postFunctionExecute, WorkflowDaoImpl workflowDao) {
+		this.sessionService = sessionService;
+		this.statusCategoryService = statusCategoryService;
+		this.workflowableTaskDao = workflowableTaskDao;
+		this.observerService = observerService;
+		this.postFunctionExecute = postFunctionExecute;
+		this.workflowDao = workflowDao;
+	}
 
 	TransitionResult invoke(final BcDescription bcDescription, final WorkflowableTask task,
 			final WorkflowTransition transition) {
