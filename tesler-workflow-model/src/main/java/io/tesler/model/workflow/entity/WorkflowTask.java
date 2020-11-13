@@ -21,15 +21,13 @@
 package io.tesler.model.workflow.entity;
 
 import io.tesler.model.core.entity.BaseEntity;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.JoinFormula;
+
+import javax.persistence.*;
+import java.util.Optional;
 
 @Getter
 @Setter
@@ -46,23 +44,16 @@ public class WorkflowTask extends BaseEntity {
 	private WorkflowStep workflowStep;
 
 	private transient WorkflowStep temporalWfStep;
-
-	public WorkflowStep getWorkflowStep() {
-		if (temporalWfStep != null) {
-			return temporalWfStep;
-		} else {
-			return workflowStep;
-		}
-	}
-
 	private String stepName;
-
 	private Double version;
-
 	private String workflowName;
-
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "PENDING_TRANSITION_ID")
 	private PendingTransition pendingTransition;
+
+	public WorkflowStep getWorkflowStep() {
+		return Optional.ofNullable(temporalWfStep).orElse(workflowStep);
+	}
+
 
 }
