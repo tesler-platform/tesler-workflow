@@ -20,9 +20,6 @@
 
 package io.tesler.engine.workflow.services;
 
-import static io.tesler.api.data.dictionary.CoreDictionaries.TaskStatusCategory.isAutoClosed;
-import static io.tesler.api.data.dictionary.CoreDictionaries.TaskStatusCategory.isDone;
-
 import io.tesler.core.crudma.bc.impl.BcDescription;
 import io.tesler.core.dto.rowmeta.PostAction;
 import io.tesler.core.util.DateTimeUtil;
@@ -30,18 +27,18 @@ import io.tesler.core.util.session.SessionService;
 import io.tesler.engine.workflow.dao.WorkflowDaoImpl;
 import io.tesler.engine.workflow.dao.WorkflowableTaskDao;
 import io.tesler.model.core.entity.User;
-import io.tesler.model.workflow.entity.WorkflowStep;
-import io.tesler.model.workflow.entity.WorkflowTask;
-import io.tesler.model.workflow.entity.WorkflowTransition;
-import io.tesler.model.workflow.entity.WorkflowTransitionHistory;
-import io.tesler.model.workflow.entity.WorkflowableTask;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import io.tesler.model.workflow.entity.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.stereotype.Service;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+import static io.tesler.api.data.dictionary.CoreDictionaries.TaskStatusCategory.isAutoClosed;
+import static io.tesler.api.data.dictionary.CoreDictionaries.TaskStatusCategory.isDone;
 
 @Slf4j
 @Service
@@ -64,7 +61,7 @@ final class TransitionInvoke {
 			final WorkflowTransition transition) {
 		final TransitionResult transitionResult = isBackgroundExecution(transition)
 				? waitTransition(task, transition)
-				: forceInvoke(bcDescription, task, transition);
+				: forceInvoke(bcDescription, task, transition, false);
 
 		if (bcDescription != null
 				&& isFinalStep(transition.getDestinationStep())
@@ -77,11 +74,12 @@ final class TransitionInvoke {
 	}
 
 	TransitionResult forceInvoke(final BcDescription bcDescription, final WorkflowableTask task,
-			final WorkflowTransition transition) {
+			final WorkflowTransition transition, final boolean ignorePostFunctions) {
 		final User previousAssignee = task.getAssignee();
 		observerService.ifPresent(observerService -> observerService.addUserAsObserver(task, previousAssignee));
 
-		final List<PostAction> postActions = postFunctionExecute.execute(bcDescription, task, transition);
+		final List<PostAction> postActions = ignorePostFunctions ? Collections.emptyList()
+				: postFunctionExecute.execute(bcDescription, task, transition);
 		final WorkflowTransitionHistory transitionHistory = workflowDao.saveTransitionHistory(
 				task,
 				transition,
@@ -90,12 +88,12 @@ final class TransitionInvoke {
 		);
 
 		updateTaskWorkflowStep(task, transition.getDestinationStep());
-		log.debug("Переход выполнен");
+		log.debug("Transition performed successfully");
 		return new TransitionResult(transitionHistory, postActions);
 	}
 
 	private TransitionResult waitTransition(final WorkflowableTask task, final WorkflowTransition transition) {
-		log.debug("Переход будет выполнен в фоне");
+		log.debug("Transition will be performed in background mode");
 		task.getWorkflowTask().setPendingTransition(workflowDao.createPendingTransition(
 				transition,
 				sessionService.getSessionUser(),
@@ -158,7 +156,7 @@ final class TransitionInvoke {
 
 	//todo
 	private boolean isInProgressStep(final WorkflowStep step) {
-		return "В работе".equals(step.getName());
+		return "In progress".equals(step.getName());
 	}
 
 }

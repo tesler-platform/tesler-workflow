@@ -27,105 +27,113 @@ import io.tesler.model.core.entity.User;
 import io.tesler.model.workflow.entity.WorkflowStep;
 import io.tesler.model.workflow.entity.WorkflowTransition;
 import io.tesler.model.workflow.entity.WorkflowableTask;
-import java.util.List;
 import org.pf4j.ExtensionPoint;
 import org.springframework.data.jpa.domain.Specification;
+
+import java.util.List;
 
 
 public interface WorkflowEngine extends ExtensionPoint {
 
 	/**
-	 * Устанавливает указанную активность в начальный шаг соответствующей модели переходов.
-	 * Модель переходов выбирается в соответствии c проектом {@link WorkflowableTask#getProject()}
-	 * и типом {@link WorkflowableTask#getTaskType()} активности.
+	 * Sets the specified task to the initial step of the corresponding transition model.
+	 * The transition model is selected according to the project {@link WorkflowableTask#getProject()}
+	 * and type {@link WorkflowableTask#getTaskType()} of task.
 	 *
-	 * @param task активность
+	 * @param task workflow task
 	 */
 	void setInitialStep(WorkflowableTask task);
 
 	/**
-	 * Устанавливает указанную активность в заданный шаг соответствующей модели переходов.
+	 * Sets the specified task to the specified step of the corresponding transition model.
 	 *
-	 * @param task активность
-	 * @param step шаг модели переходов
+	 * @param task task
+	 * @param step step of the transition model
 	 */
 	void setCustomStep(WorkflowableTask task, WorkflowStep step);
 
 	/**
-	 * Возвращает доступные переходы для указанной активности.
+	 * Returns available transitions for the specified task.
 	 *
-	 * @param task активность
-	 * @return доступные переходы
+	 * @param task tasj
+	 * @return list of available transitions
 	 */
 	List<WorkflowTransition> getTransitions(WorkflowableTask task);
 
 	/**
-	 * Выполнение инициированного пользователем перехода для заданной активности.
+	 * Performing a user-initiated transition for a specific task
 	 *
-	 * @param bcDescription описание бизнес-компонента активности
-	 * @param task активность
-	 * @param transition переход
-	 * @param preInvokeParameters полученные у пользователя подтверждения перехода
-	 * @return результат выполнения перехода
+	 * @param bcDescription       description of the business component of a task
+	 * @param task                task
+	 * @param transition          transition
+	 * @param preInvokeParameters the user's confirmation of the transition
+	 * @return result of the transition
 	 */
 	TransitionResult invokeTransition(BcDescription bcDescription, WorkflowableTask task, WorkflowTransition transition,
 			List<String> preInvokeParameters);
 
 	/**
-	 * Выполнение автоматического перехода для заданной активности.
+	 * Performing an automatic transition for the specified task.
 	 *
-	 * @param task активность
-	 * @param transition переход
-	 * @return результат выполнения перехода
+	 * @param task       task
+	 * @param transition transition
+	 * @return result of the transition
 	 */
 	TransitionResult invokeAutoTransition(WorkflowableTask task, WorkflowTransition transition);
 
 	/**
-	 * Выполнение автоматического перехода для заданной активности без проверок его возможности.
+	 * Performing an automatic transition for a given task without checking its capability.
 	 *
-	 * @param task активность
-	 * @param transition переход
+	 * @param task       task
+	 * @param transition transition
 	 */
 	void forceInvokeAutoTransition(WorkflowableTask task, WorkflowTransition transition);
 
 	/**
-	 * Выполнение автоматического перехода для заданной активности в шаг со статусом HIDDEN, если он есть в модели переходов.
+	 * Performing an automatic transition for a specified task to a step with the HIDDEN status, if it exists in the transition model.
 	 *
-	 * @param task активность
+	 * @param task task
 	 */
 	void forceInvokeAutoTransitionToHiddenStep(WorkflowableTask task);
 
 	/**
-	 * Проверяет заблокировано ли редактирование дочерних бизнес-компонентов указанной активности.
+	 * Checks whether editing of child business components of a specified task is blocked.
 	 *
-	 * @param bcIdentifier идентификатор бизнес-компонента активности
-	 * @param task активность
-	 * @return заблокировано ли редактирование дочерних бизнес-компонентов
+	 * @param bcIdentifier identifier of business component which is mapped to a task
+	 * @param task         task
+	 * @return whether editing of child business components is blocked
 	 */
 	boolean isChildBcDisabled(BcIdentifier bcIdentifier, WorkflowableTask task);
 
 	/**
-	 * Возвращает список недоступных для редактирования полей заданной активности.
+	 * Returns a list of fields that are not editable for a specified task.
 	 *
-	 * @param task активность
-	 * @return список недоступных для редактирования полей
+	 * @param task task
+	 * @return list of fields that can't be edited
 	 */
 	List<String> getDisableFields(WorkflowableTask task);
 
 	/**
-	 * Возвращает спецификацию для поиска рекомендованных исполнителей для указанной активности.
+	 * Returns a specification for searching for recommended performers for a specified task.
 	 *
-	 * @param task активность
-	 * @return спецификацию для поиска рекомендованных исполнителей
+	 * @param task task
+	 * @return specification for searching for recommended performers
 	 */
 	Specification<User> getAssigneeRecommendationSpecification(WorkflowableTask task);
 
 	/**
-	 * Проверяет необходимо ли проверять обязательность заполнения полей для выполнения указанного перехода.
+	 * Checks whether the required fields must be filled in to complete the specified transition..
 	 *
-	 * @param transition переход
-	 * @return необходимо ли проверять обязательность заполнения полей
+	 * @param transition transition
+	 * @return whether it is necessary to check filling of mandatory fields
 	 */
 	boolean checkRequiredFieldsForTransition(WorkflowTransition transition);
+
+	/** Performing an automatic transition for a specified task without executing post functions and checking its capability.
+	 * @param transition transition to be performed
+	 * @param task task
+	 * @return result of the transition
+	 */
+	TransitionResult forceInvokeAutoTransitionIgnorePostFunctions(WorkflowTransition transition, WorkflowableTask task);
 
 }
