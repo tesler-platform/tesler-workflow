@@ -20,12 +20,6 @@
 
 package io.tesler.engine.workflow.dao;
 
-import static io.tesler.api.data.dictionary.DictionaryType.TASK_TYPE;
-import static java.util.Comparator.comparing;
-import static java.util.Comparator.naturalOrder;
-import static java.util.Comparator.nullsFirst;
-import static java.util.Comparator.nullsLast;
-
 import io.tesler.api.data.dictionary.CoreDictionaries;
 import io.tesler.api.data.dictionary.CoreDictionaries.TaskStatus;
 import io.tesler.api.data.dictionary.LOV;
@@ -36,46 +30,25 @@ import io.tesler.model.core.dao.util.JpaUtils;
 import io.tesler.model.core.entity.BaseEntity_;
 import io.tesler.model.core.entity.Project;
 import io.tesler.model.core.entity.User;
-import io.tesler.model.workflow.entity.PendingTransition;
-import io.tesler.model.workflow.entity.Workflow;
-import io.tesler.model.workflow.entity.WorkflowAssigneeRecommendation;
-import io.tesler.model.workflow.entity.WorkflowAssigneeRecommendation_;
-import io.tesler.model.workflow.entity.WorkflowCondition;
-import io.tesler.model.workflow.entity.WorkflowCondition_;
-import io.tesler.model.workflow.entity.WorkflowPostFunction;
-import io.tesler.model.workflow.entity.WorkflowPostFunction_;
-import io.tesler.model.workflow.entity.WorkflowStep;
-import io.tesler.model.workflow.entity.WorkflowStepConditionGroup;
-import io.tesler.model.workflow.entity.WorkflowStepConditionGroup_;
-import io.tesler.model.workflow.entity.WorkflowStepField;
-import io.tesler.model.workflow.entity.WorkflowStep_;
-import io.tesler.model.workflow.entity.WorkflowTask;
-import io.tesler.model.workflow.entity.WorkflowTaskChildBcAvailability;
-import io.tesler.model.workflow.entity.WorkflowTransition;
-import io.tesler.model.workflow.entity.WorkflowTransitionConditionGroup;
-import io.tesler.model.workflow.entity.WorkflowTransitionHistory;
-import io.tesler.model.workflow.entity.WorkflowTransitionHistory_;
-import io.tesler.model.workflow.entity.WorkflowTransitionValidation;
-import io.tesler.model.workflow.entity.WorkflowTransitionValidation_;
-import io.tesler.model.workflow.entity.WorkflowTransition_;
-import io.tesler.model.workflow.entity.WorkflowVersion;
-import io.tesler.model.workflow.entity.WorkflowVersion_;
-import io.tesler.model.workflow.entity.Workflow_;
-import io.tesler.model.workflow.entity.WorkflowableTask;
+import io.tesler.model.workflow.entity.*;
+import lombok.extern.slf4j.Slf4j;
+import org.pf4j.Extension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
-import lombok.extern.slf4j.Slf4j;
-import org.pf4j.Extension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+
+import static io.tesler.api.data.dictionary.DictionaryType.TASK_TYPE;
+import static java.util.Comparator.*;
 
 @Slf4j
 @Service
@@ -212,10 +185,7 @@ public class WorkflowDaoImpl implements WorkflowDao {
 			query.orderBy(cb.desc(root.get(BaseEntity_.createdDate)));
 			return cb.and(
 					cb.equal(root.get(WorkflowTransitionHistory_.workflowTask), task),
-					cb.equal(
-							root.get(WorkflowTransitionHistory_.transition).get(WorkflowTransition_.destinationStep),
-							destinationStep
-					)
+					cb.equal(root.get(WorkflowTransitionHistory_.destinationStepName), destinationStep.getName())
 			);
 		});
 	}
@@ -404,11 +374,14 @@ public class WorkflowDaoImpl implements WorkflowDao {
 			final WorkflowTransition transition, final User currentUser, final User previousAssignee) {
 		final WorkflowTransitionHistory history = new WorkflowTransitionHistory();
 		history.setWorkflowTask(task.getWorkflowTask());
-		history.setTransition(transition);
+		history.setTransitionName(transition.getName());
+		history.setSourceStepName(transition.getSourceStep().getName());
+		history.setDestinationStepName(transition.getDestinationStep().getName());
 		history.setTransitionUser(currentUser);
 		history.setPreviousAssignee(previousAssignee);
 		jpaDao.save(history);
 		return history;
+
 	}
 
 	public <C extends WorkflowCondition> List<C> getConditions(

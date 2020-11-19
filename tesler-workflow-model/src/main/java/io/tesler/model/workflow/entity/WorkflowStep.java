@@ -75,5 +75,4 @@ public class WorkflowStep extends BaseEntity {
 
 	@OneToMany(fetch = LAZY, mappedBy = "workflowStep")
 	private List<WorkflowTaskChildBcAvailability> childBcAvailabilities;
-
 }
