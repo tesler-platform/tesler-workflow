@@ -22,176 +22,170 @@ package io.tesler.engine.workflow.services;
 
 import io.tesler.api.data.dictionary.LOV;
 import io.tesler.model.core.entity.Project;
-import io.tesler.model.workflow.entity.Workflow;
-import io.tesler.model.workflow.entity.WorkflowPostFunction;
-import io.tesler.model.workflow.entity.WorkflowStep;
-import io.tesler.model.workflow.entity.WorkflowTask;
-import io.tesler.model.workflow.entity.WorkflowTransition;
-import io.tesler.model.workflow.entity.WorkflowTransitionConditionGroup;
-import io.tesler.model.workflow.entity.WorkflowTransitionHistory;
-import io.tesler.model.workflow.entity.WorkflowVersion;
-import io.tesler.model.workflow.entity.WorkflowableTask;
+import io.tesler.model.workflow.entity.*;
+import org.pf4j.ExtensionPoint;
+
 import java.math.BigDecimal;
 import java.util.List;
-import org.pf4j.ExtensionPoint;
 
 
 public interface WorkflowDao extends ExtensionPoint {
 
 	/**
-	 * Возвращает текущий шаг для указанной активности.
+	 * Returns the current step for the specified activity.
 	 *
-	 * @param task активность
-	 * @return текущий шаг активности
+	 * @param task task
+	 * @return current step of task
 	 */
 	WorkflowStep getCurrentStep(WorkflowableTask task);
 
 	/**
-	 * Возвращает шаг со статусом HIDDEN для указанной версии модели переходов.
+	 * Returns a step with the HIDDEN status for the specified version of the transition model.
 	 *
-	 * @param version версия модели переходов
-	 * @return шаг со статусом HIDDEN
+	 * @param version version of the transition model
+	 * @return step with the HIDDEN status
 	 */
 	WorkflowStep getHiddenStep(WorkflowVersion version);
 
 	/**
-	 * Возвращает начальный шаг для модели переходов соответствующей указанному проекту и типу активности.
+	 * Returns the initial step for the transition model corresponding to the specified project and task type.
 	 *
-	 * @param project проект
-	 * @param taskType тип активности
-	 * @return начальный шаг модели переходов
+	 * @param project the project
+	 * @param taskType task type
+	 * @return initial step of the transition model
 	 */
 	WorkflowStep getInitialStep(Project project, LOV taskType);
 
 	/**
-	 * Проверяет является ли указанный шак начальным для своей модели переходов.
+	 * * Checks whether the specified step is the initial step for its transition model.
 	 *
-	 * @param step шаг
-	 * @return является ли указанный шак начальным
+	 * @param step step
+	 * @return whether the specified step is the initial one
 	 */
 	boolean isInitialStep(WorkflowStep step);
 
 	/**
-	 * Возвращает шаг указанной версии модели переходов по его уникальному идентификатору.
+	 * Returns the step of the specified version of the transition model by its unique name.
 	 *
-	 * @param version версия модели переходов
-	 * @param uuid уникальный идентификатор шага
-	 * @return шаг указанной версии модели переходов
+	 * @param version version of the transition model
+	 * @param name the unique name of the step
+	 * @return step of the specified version of the transition model
 	 */
-	WorkflowStep getStepByName(WorkflowVersion version, String uuid);
+	WorkflowStep getStepByName(WorkflowVersion version, String name);
 
 	/**
-	 * Возвращает все переходы указанной модели переходов уникальные идентификаторы которых равны заданному.
+	 * Returns all transitions of the specified transition model whose unique names are equal to the specified one.
 	 *
-	 * @param workflow модель переходов
-	 * @param uuid уникальный идентификатор перехода
-	 * @return список переходов указанной модели переходов
+	 * @param workflow transition model
+	 * @param name unique transition name
+	 * @return list of transitions for the specified transition model
 	 */
-	List<WorkflowTransition> getTransitionsByName(Workflow workflow, String uuid);
+	List<WorkflowTransition> getTransitionsByName(Workflow workflow, String name);
 
 	/**
-	 * Возвращает переход указанной версии модели переходов по его уникальному идентификатору.
+	 * Returns the transition of the specified version of the transition model by its unique name.
 	 *
-	 * @param version версия модели переходов
-	 * @param uuid уникальный идентификатор перехода
-	 * @return переход указанной версии модели переходов
+	 * @param version version of the transition model
+	 * @param name unique transition name
+	 * @return transition of the specified version of the transition model
 	 */
-	WorkflowTransition getTransitionByName(WorkflowVersion version, String uuid);
+	WorkflowTransition getTransitionByName(WorkflowVersion version, String name);
 
 	/**
-	 * Возвращает переход последней версии модели переходов по его уникальному идентификатору.
+	 * Returns a transition from the latest version of the transition model by its unique name.
 	 *
-	 * @param uuid уникальный идентификатор перехода
-	 * @return переход последней версии модели переходов
+	 * @param name unique transition name
+	 * @return transition of the latest version of the transition model
 	 */
-	WorkflowTransition getLastWorkflowTransitionByName(String uuid);
+	WorkflowTransition getLastWorkflowTransitionByName(String name);
 
 	/**
-	 * Возвращает переход активной версии модели переходов по его уникальному идентификатору.
+	 * Returns a transition from the active version of the transition model by its unique name.
 	 *
-	 * @param uuid уникальный идентификатор перехода
-	 * @return переход активной версии модели переходов
+	 * @param name unique name of the transition
+	 * @return transition of the active version of the transition model
 	 */
-	WorkflowTransition getActiveWorkflowTransitionByName(String uuid);
+	WorkflowTransition getActiveWorkflowTransitionByName(String name);
 
 	/**
-	 * Возвращает переход активной модели переходов соответствующей указанному типу активности между шагами с заданными статусами.
+	 * Returns the transition of the active transition model corresponding to the specified task type between steps with the specified statuses.
 	 *
-	 * @param taskType тип активности
-	 * @param sourceStepTaskStatus статус начального шага
-	 * @param destinationStepTaskStatus статус конечного шага
-	 * @return переход модели переходов
+	 * @param taskType type of task
+	 * @param sourceStepTaskStatus initial step status
+	 * @param destinationStepTaskStatus the status of the final step
+	 * @return transition of the transition model
 	 */
 	WorkflowTransition getTransition(LOV taskType, LOV sourceStepTaskStatus, LOV destinationStepTaskStatus);
 
 	/**
-	 * Возвращает последнюю запись истории переходов для указанной активности соответствующую переходу у заданный шаг.
+	 * Returns the last transition history record for the specified task corresponding to the transition at the specified step.
 	 *
-	 * @param task активность
-	 * @param destinationStep конечный шаг перехода
-	 * @return последнюю запись истории переходов
+	 * @param task task
+	 * @param destinationStep destination step of the transition
+	 * @return the last transition history record
 	 */
-	WorkflowTransitionHistory getLastTransitionHistoryByDestinationStep(WorkflowTask task, WorkflowStep destinationStep);
+	WorkflowTransitionHistory getLastTransitionHistoryByDestinationStep(WorkflowTask task,
+			WorkflowStep destinationStep);
 
 	/**
-	 * Возвращает последнюю запись истории переходов для указанной активности.
+	 * Returns the last transition history record for the specified task.
 	 *
-	 * @param task активность
-	 * @return последнюю запись истории переходов
+	 * @param task task
+	 * @return the last entry in the transition history
 	 */
 	WorkflowTransitionHistory getLastTransitionHistory(WorkflowTask task);
 
 	/**
-	 * Создает дефолтные пост-функции для указанной группы условий перехода.
+	 * Creates default post-functions for the specified group of transition conditions.
 	 *
-	 * @param transitionConditionGroup группа условий перехода
+	 * @param transitionConditionGroup transition condition group
 	 */
 	void createDefaultPostFunctions(WorkflowTransitionConditionGroup transitionConditionGroup);
 
 	/**
-	 * Удаляет указанную пост-функцию со всеми дочерними сущностями.
+	 * Deletes the specified post-function with all child entities.
 	 *
-	 * @param postFunction пост-функция
+	 * @param postFunction post function
 	 */
 	void deletePostFunction(WorkflowPostFunction postFunction);
 
 	/**
-	 * Удаляет указанную группу условий перехода со всеми дочерними сущностями.
+	 * Deletes the specified transition condition group with all child entities.
 	 *
-	 * @param transitionConditionGroup группа условий перехода
+	 * @param transitionConditionGroup transition condition group
 	 */
 	void deleteTransitionConditionGroup(WorkflowTransitionConditionGroup transitionConditionGroup);
 
 	/**
-	 * Возвращает версию модели переходов указанной активности.
+	 * Returns the version of the transition model for the specified activity.
 	 *
-	 * @param task активность
-	 * @return версию модели переходов указанной активности
+	 * @param task activity
+	 * @return version of the transition model for the specified activity
 	 */
 	WorkflowVersion getWorkflowVersion(WorkflowableTask task);
 
 	/**
-	 * Возвращает список типов TASK_TYPE, для которых не созданы модели переходов в указанном проекте.
+	 * Returns a list of TASK_TYPE types that do not have transition models created in the specified project.
 	 *
-	 * @param project проект
-	 * @return список типов TASK_TYPE, для которых не созданы модели переходов в указанном проекте
+	 * @param project the project
+	 * @return list of TASK_TYPE types for which transition models were not created in the specified project
 	 */
 	List<LOV> getTaskTypesNotInWf(Project project);
 
 	/**
-	 * Возвращает максимальный номер версии для указанной модели переходов.
+	 * Returns the maximum version number for the specified transition model.
 	 *
-	 * @param workflow модель переходов
-	 * @return максимальный номер версии для указанной модели переходов
+	 * @param workflow transition model
+	 * @return maximum version number for the specified transition model
 	 */
 	BigDecimal getMaxVersion(Workflow workflow);
 
 	/**
-	 * Возвращает номер следующей версии для указанной модели переходов.
+	 * Returns the next version number for the specified transition model.
 	 *
-	 * @param workflow модель переходов
-	 * @param majorVersion должна ли быть следующая версия мажорной
-	 * @return номер следующей версии для указанной модели переходов
+	 * @param workflow transition model
+	 * @param majorVersion should there be a next major version
+	 * @return the next version number for the specified transition model
 	 */
 	BigDecimal getNextVersion(Workflow workflow, boolean majorVersion);
 
@@ -204,8 +198,29 @@ public interface WorkflowDao extends ExtensionPoint {
 
 	/**
 	 * Sets workflow step to workflow task
-	 *
 	 */
 	void setWorkflowStep(WorkflowTask workflowTask, WorkflowStep workflowStep);
+
+	/**
+	 * @param sourceStep      source step
+	 * @param destinationStep destination step
+	 * @return transition with specified source and destination step
+	 */
+	WorkflowTransition getTransitionBetweenSteps(final WorkflowStep sourceStep, final WorkflowStep destinationStep);
+
+	/**
+	 * @param sourceStep source step
+	 * @return list of transitions for current step
+	 */
+	List<WorkflowTransition> getTransitions(final WorkflowStep sourceStep);
+
+
+	/**
+	 * @param conditionClass class of entity related to WF_COND table specified in WorkflowSettings
+	 * @param conditionGroup condition group of conditions
+	 * @return list of conditions for a given WorkflowTransitionConditionGroup from workflow cache
+	 */
+	<C extends WorkflowCondition> List<C> getConditions(final Class<C> conditionClass,
+			final WorkflowTransitionConditionGroup conditionGroup);
 
 }
