@@ -21,19 +21,20 @@
 package io.tesler.engine.workflow.notification.impl;
 
 import io.tesler.api.data.dao.databaselistener.IChangeVector;
-import io.tesler.api.data.dictionary.CoreDictionaries.NotificationRecipient;
 import io.tesler.api.data.dictionary.LOV;
 import io.tesler.core.util.session.SessionService;
 import io.tesler.engine.notification.IWorkflowVersionEventGenerator;
-import io.tesler.model.core.api.notifications.INotificationEventBuilder;
-import io.tesler.model.core.api.notifications.IRecipientResolver;
 import io.tesler.model.core.entity.User;
-import io.tesler.model.core.listeners.hbn.change.notifications.AbstractEventGenerator;
 import io.tesler.model.workflow.entity.WorkflowVersion;
 import com.google.common.collect.ImmutableMap;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import io.tesler.notifications.dictionary.NotificationDictionaries;
+import io.tesler.notifications.model.api.INotificationEventBuilder;
+import io.tesler.notifications.model.api.IRecipientResolver;
+import io.tesler.notifications.model.hbn.change.AbstractEventGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.pf4j.Extension;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +50,7 @@ public class WorkflowVersionEventGenerator extends AbstractEventGenerator<Workfl
 	private SessionService sessionService;
 
 	private Map<LOV, IRecipientResolver<WorkflowVersion>> recipientResolvers = new ImmutableMap.Builder<LOV, IRecipientResolver<WorkflowVersion>>()
-			.put(NotificationRecipient.CURRENT_USER, this::getCurrentUser)
+			.put(NotificationDictionaries.NotificationRecipient.CURRENT_USER, this::getCurrentUser)
 			.build();
 
 	@Override

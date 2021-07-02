@@ -104,7 +104,9 @@ public class WorkflowActionUtils {
 					transitionActionGroup.getType(),
 					transitionActionGroup.getText(),
 					transitionActionGroup.getMaxGroupVisualButtonsCount(),
-					actionDTOS
+					actionDTOS,
+					null,
+					false
 			);
 			actionDTO.setAvailable(true);
 			actionDTO.setScope(ActionScope.RECORD.toString().toLowerCase());

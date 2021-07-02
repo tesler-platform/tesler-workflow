@@ -22,10 +22,11 @@ package io.tesler.engine.notification;
 
 import io.tesler.api.data.dao.databaselistener.IChangeListener;
 import io.tesler.api.data.dictionary.LOV;
-import io.tesler.model.core.api.notifications.INotificationEventBuilder;
 import io.tesler.model.core.entity.User;
 import io.tesler.model.workflow.entity.WorkflowVersion;
 import java.util.List;
+
+import io.tesler.notifications.model.api.INotificationEventBuilder;
 import org.pf4j.ExtensionPoint;
 
 
