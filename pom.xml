@@ -40,7 +40,7 @@
   <parent>
     <groupId>io.tesler</groupId>
     <artifactId>tesler-bom</artifactId>
-    <version>3.0.0.M13.3-SNAPSHOT</version>
+    <version>3.0.0.M13.5-SNAPSHOT</version>
   </parent>
 
 
@@ -69,7 +69,7 @@
     <skip.checkstyle>false</skip.checkstyle>
     <gpg.key>FFD341CE2A7591F85FBEFCCB004D6BF2F8C03354</gpg.key>
     <skip.deploy>false</skip.deploy>
-    <tesler.version>3.0.0.M13.3-SNAPSHOT</tesler.version>
+    <tesler.version>3.0.0.M13.5-SNAPSHOT</tesler.version>
   </properties>
 
 
